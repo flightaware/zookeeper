@@ -181,10 +181,15 @@ typedef struct _auth_list_head {
 #endif
 } auth_list_head_t;
 
+#define ZHANDLE_MAGIC 7311337
+
+#define ZHANDLE_ASSERT(x) assert (x->zhandle_magic == ZHANDLE_MAGIC);
+
 /**
  * This structure represents the connection to zookeeper.
  */
 struct _zhandle {
+	int zhandle_magic;
 #ifdef WIN32
     SOCKET fd;                          // the descriptor used to talk to zookeeper
 #else
