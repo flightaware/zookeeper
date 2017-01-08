@@ -460,10 +460,12 @@ static void init_auth_info(auth_list_head_t *auth_list)
 }
 
 static void mark_active_auth(zhandle_t *zh) {
-	ZHANDLE_ASSERT(zh);
 
-    auth_list_head_t auth_h = zh->auth_h;
+    auth_list_head_t auth_h;
     auth_info *element;
+
+	ZHANDLE_ASSERT(zh);
+    auth_h = zh->auth_h;
     if (auth_h.auth == NULL) {
         return;
     }
@@ -1032,9 +1034,10 @@ static void null_watcher_fn(zhandle_t* p1, int p2, int p3,const char* p4,void*p5
 
 watcher_fn zoo_set_watcher(zhandle_t *zh,watcher_fn newFn)
 {
-	ZHANDLE_ASSERT(zh);
+    watcher_fn oldWatcher;
 
-    watcher_fn oldWatcher=zh->watcher;
+	ZHANDLE_ASSERT(zh);
+    oldWatcher=zh->watcher;
     if (newFn) {
        zh->watcher = newFn;
     } else {
@@ -3063,9 +3066,9 @@ static completion_list_t* do_create_completion_entry(zhandle_t *zh, int xid,
         watcher_registration_t* wo, completion_head_t *clist,
         watcher_deregistration_t* wdo)
 {
+    completion_list_t *c;
 	ZHANDLE_ASSERT(zh);
-
-    completion_list_t *c = calloc(1, sizeof(completion_list_t));
+    c = calloc(1, sizeof(completion_list_t));
     if (!c) {
         LOG_ERROR(LOGCALLBACK(zh), "out of memory");
         return 0;
@@ -3156,9 +3159,10 @@ static int add_completion(zhandle_t *zh, int xid, int completion_type,
         const void *dc, const void *data, int add_to_front,
         watcher_registration_t* wo, completion_head_t *clist)
 {
-	ZHANDLE_ASSERT(zh);
+    completion_list_t *c;
 
-    completion_list_t *c =create_completion_entry(zh, xid, completion_type, dc,
+	ZHANDLE_ASSERT(zh);
+    c =create_completion_entry(zh, xid, completion_type, dc,
             data, wo, clist);
     return do_add_completion(zh, dc, c, add_to_front);
 }
@@ -3167,9 +3171,10 @@ static int add_completion_deregistration(zhandle_t *zh, int xid,
         int completion_type, const void *dc, const void *data, int add_to_front,
         watcher_deregistration_t* wdo, completion_head_t *clist)
 {
-	ZHANDLE_ASSERT(zh);
+    completion_list_t *c;
 
-    completion_list_t *c = create_completion_entry_deregistration(zh, xid,
+	ZHANDLE_ASSERT(zh);
+    c = create_completion_entry_deregistration(zh, xid,
            completion_type, dc, data, wdo, clist);
     return do_add_completion(zh, dc, c, add_to_front);
 }
@@ -3553,9 +3558,10 @@ int zoo_aset(zhandle_t *zh, const char *path, const char *buffer, int buflen,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_SETDATA_OP};
     struct SetDataRequest req;
-	ZHANDLE_ASSERT(zh);
+	int rc;
 
-    int rc = SetDataRequest_init(zh, &req, path, buffer, buflen, version);
+	ZHANDLE_ASSERT(zh);
+    rc = SetDataRequest_init(zh, &req, path, buffer, buflen, version);
     if (rc != ZOK) {
         return rc;
     }
@@ -3611,10 +3617,10 @@ int zoo_acreate(zhandle_t *zh, const char *path, const char *value,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_CREATE_OP};
     struct CreateRequest req;
+	int rc;
 
 	ZHANDLE_ASSERT(zh);
-
-    int rc = CreateRequest_init(zh, &req, 
+    rc = CreateRequest_init(zh, &req, 
             path, value, valuelen, acl_entries, flags);
     if (rc != ZOK) {
         return rc;
@@ -3645,10 +3651,10 @@ int zoo_acreate2(zhandle_t *zh, const char *path, const char *value,
     struct oarchive *oa;
     struct RequestHeader h = { get_xid(), ZOO_CREATE2_OP };
     struct CreateRequest req;
+	int rc;
 
 	ZHANDLE_ASSERT(zh);
-
-    int rc = CreateRequest_init(zh, &req, path, value, valuelen, acl_entries, flags);
+    rc = CreateRequest_init(zh, &req, path, value, valuelen, acl_entries, flags);
     if (rc != ZOK) {
         return rc;
     }
@@ -3674,9 +3680,9 @@ int zoo_acreate2(zhandle_t *zh, const char *path, const char *value,
 int DeleteRequest_init(zhandle_t *zh, struct DeleteRequest *req,
         const char *path, int version)
 {
+	int rc;
 	ZHANDLE_ASSERT(zh);
-
-    int rc = Request_path_init(zh, 0, &req->path, path);
+    rc = Request_path_init(zh, 0, &req->path, path);
     if (rc != ZOK) {
         return rc;
     }
@@ -3690,9 +3696,10 @@ int zoo_adelete(zhandle_t *zh, const char *path, int version,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_DELETE_OP};
     struct DeleteRequest req;
-	ZHANDLE_ASSERT(zh);
+	int rc;
 
-    int rc = DeleteRequest_init(zh, &req, path, version);
+	ZHANDLE_ASSERT(zh);
+    rc = DeleteRequest_init(zh, &req, path, version);
     if (rc != ZOK) {
         return rc;
     }
@@ -3728,9 +3735,10 @@ int zoo_awexists(zhandle_t *zh, const char *path,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_EXISTS_OP};
     struct ExistsRequest req;
-	ZHANDLE_ASSERT(zh);
+	int rc;
 
-    int rc = Request_path_watch_init(zh, 0, &req.path, path, 
+	ZHANDLE_ASSERT(zh);
+    rc = Request_path_watch_init(zh, 0, &req.path, path, 
             &req.watch, watcher != NULL);
     if (rc != ZOK) {
         return rc;
@@ -3764,9 +3772,10 @@ static int zoo_awget_children_(zhandle_t *zh, const char *path,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_GETCHILDREN_OP};
     struct GetChildrenRequest req ;
-	ZHANDLE_ASSERT(zh);
+	int rc;
 
-    int rc = Request_path_watch_init(zh, 0, &req.path, path, 
+	ZHANDLE_ASSERT(zh);
+    rc = Request_path_watch_init(zh, 0, &req.path, path, 
             &req.watch, watcher != NULL);
     if (rc != ZOK) {
         return rc;
@@ -3810,13 +3819,14 @@ static int zoo_awget_children2_(zhandle_t *zh, const char *path,
          strings_stat_completion_t ssc,
          const void *data)
 {
-	ZHANDLE_ASSERT(zh);
-
     /* invariant: (sc == NULL) != (sc == NULL) */
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_GETCHILDREN2_OP};
     struct GetChildren2Request req ;
-    int rc = Request_path_watch_init(zh, 0, &req.path, path, 
+	int rc;
+
+	ZHANDLE_ASSERT(zh);
+    rc = Request_path_watch_init(zh, 0, &req.path, path, 
             &req.watch, watcher != NULL);
     if (rc != ZOK) {
         return rc;
@@ -3855,7 +3865,6 @@ int zoo_awget_children2(zhandle_t *zh, const char *path,
          const void *data)
 {
 	ZHANDLE_ASSERT(zh);
-
     return zoo_awget_children2_(zh,path,watcher,watcherCtx,dc,data);
 }
 
@@ -3865,9 +3874,10 @@ int zoo_async(zhandle_t *zh, const char *path,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_SYNC_OP};
     struct SyncRequest req;
-	ZHANDLE_ASSERT(zh);
+	int rc;
 
-    int rc = Request_path_init(zh, 0, &req.path, path);
+	ZHANDLE_ASSERT(zh);
+    rc = Request_path_init(zh, 0, &req.path, path);
     if (rc != ZOK) {
         return rc;
     }
@@ -3897,9 +3907,10 @@ int zoo_aget_acl(zhandle_t *zh, const char *path, acl_completion_t completion,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_GETACL_OP};
     struct GetACLRequest req;
-	ZHANDLE_ASSERT(zh);
+	int rc;
 
-    int rc = Request_path_init(zh, 0, &req.path, path) ;
+	ZHANDLE_ASSERT(zh);
+    rc = Request_path_init(zh, 0, &req.path, path) ;
     if (rc != ZOK) {
         return rc;
     }
@@ -3928,9 +3939,10 @@ int zoo_aset_acl(zhandle_t *zh, const char *path, int version,
     struct oarchive *oa;
     struct RequestHeader h = {get_xid(), ZOO_SETACL_OP};
     struct SetACLRequest req;
-	ZHANDLE_ASSERT(zh);
+	int rc;
 
-    int rc = Request_path_init(zh, 0, &req.path, path);
+	ZHANDLE_ASSERT(zh);
+    rc = Request_path_init(zh, 0, &req.path, path);
     if (rc != ZOK) {
         return rc;
     }
@@ -4017,12 +4029,11 @@ int zoo_amulti(zhandle_t *zh, int count, const zoo_op_t *ops,
     struct MultiHeader mh = {-1, 1, -1};
     struct oarchive *oa = create_buffer_oarchive();
     completion_head_t clist = { 0 };
-
-    int rc = serialize_RequestHeader(oa, "header", &h);
+	int rc;
+    int index;
 
 	ZHANDLE_ASSERT(zh);
-
-    int index = 0;
+    rc = serialize_RequestHeader(oa, "header", &h);
     for (index=0; index < count; index++) {
         const zoo_op_t *op = ops+index;
         zoo_op_result_t *result = results+index;
