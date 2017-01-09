@@ -1304,9 +1304,10 @@ int zoo_set_servers(zhandle_t *zh, const char *hosts)
  */
 static int get_next_server_in_reconfig(zhandle_t *zh)
 {
-	ZHANDLE_ASSERT(zh);
+    int take_new;
 
-    int take_new = drand48() <= zh->pNew;
+	ZHANDLE_ASSERT(zh);
+    take_new = drand48() <= zh->pNew;
 
     LOG_DEBUG(LOGCALLBACK(zh), "[OLD] count=%d capacity=%d next=%d hasnext=%d",
                zh->addrs_old.count, zh->addrs_old.capacity, zh->addrs_old.next,
